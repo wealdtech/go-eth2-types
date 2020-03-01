@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,12 +14,29 @@
 package types_test
 
 import (
+	"encoding/hex"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	types "github.com/wealdtech/go-eth2-types"
 )
+
+func TestBLSPublicKeyFromBytes(t *testing.T) {
+	privBytes, err := hex.DecodeString("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866")
+	require.Nil(t, err)
+	priv, err := types.BLSPrivateKeyFromBytes(privBytes)
+	require.Nil(t, err)
+
+	goodBytes := priv.PublicKey().Marshal()
+	_, err = types.BLSPublicKeyFromBytes(goodBytes)
+	assert.Nil(t, err)
+
+	badBytes, err := hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+	require.Nil(t, err)
+	_, err = types.BLSPublicKeyFromBytes(badBytes)
+	assert.NotNil(t, err)
+}
 
 func TestBLSPublicKey(t *testing.T) {
 	privKey1, err := types.GenerateBLSPrivateKey()
@@ -40,7 +57,9 @@ func TestBLSPublicKey(t *testing.T) {
 	require.Nil(t, err)
 	pubKey2 := privKey2.PublicKey()
 
-	aggPubKey1 := pubKey1.Aggregate(pubKey2)
-	aggPubKey2 := pubKey2.Aggregate(pubKey1)
+	aggPubKey1 := pubKey1.Copy()
+	aggPubKey1.Aggregate(pubKey2)
+	aggPubKey2 := pubKey2.Copy()
+	aggPubKey2.Aggregate(pubKey1)
 	assert.Equal(t, aggPubKey1.Marshal(), aggPubKey2.Marshal())
 }

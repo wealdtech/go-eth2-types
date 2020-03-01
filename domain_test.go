@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package types
+package types_test
 
-// PrivateKey is a private key in Ethereum 2.
-type PrivateKey interface {
-	PublicKey() PublicKey
-	Sign(msg []byte) Signature
-	Marshal() []byte
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	types "github.com/wealdtech/go-eth2-types"
+)
+
+func TestDomain(t *testing.T) {
+	domain := types.Domain(types.DomainVoluntaryExit, []byte{0x01, 0x02, 0x03, 0x04})
+	assert.Equal(t, uint64(0x0403020100000004), domain)
 }

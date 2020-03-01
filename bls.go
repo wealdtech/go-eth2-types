@@ -1,4 +1,4 @@
-// Copyright 2019, 2020 Weald Technology Trading
+// Copyright 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,14 @@
 
 package types
 
-// PrivateKey is a private key in Ethereum 2.
-type PrivateKey interface {
-	PublicKey() PublicKey
-	Sign(msg []byte) Signature
-	Marshal() []byte
+import (
+	bls "github.com/herumi/bls-eth-go-binary/bls"
+)
+
+func init() {
+	err := bls.Init(bls.BLS12_381)
+	if err != nil {
+		panic(err)
+	}
+	bls.SetETHmode(1)
 }

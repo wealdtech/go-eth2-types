@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,27 +34,37 @@ func _blsPrivateKey(input string) *types.BLSPrivateKey {
 	return res
 }
 
+func TestBLSPrivateKeyFromBytes(t *testing.T) {
+	goodBytes, err := hex.DecodeString("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866")
+	require.Nil(t, err)
+	_, err = types.BLSPrivateKeyFromBytes(goodBytes)
+	assert.Nil(t, err)
+
+	badBytes, err := hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+	require.Nil(t, err)
+	_, err = types.BLSPrivateKeyFromBytes(badBytes)
+	assert.NotNil(t, err)
+}
+
 func TestBLSSignature(t *testing.T) {
 	tests := []struct {
-		name   string
-		key    *types.BLSPrivateKey
-		msg    []byte
-		domain uint64
-		err    error
+		name string
+		key  *types.BLSPrivateKey
+		msg  []byte
+		err  error
 	}{
 		{
-			name:   "Nil",
-			key:    _blsPrivateKey("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866"),
-			msg:    _byteArray("0102030405060708090a0b0c0d0e0f"),
-			domain: 1,
-			err:    errors.New("no path"),
+			name: "Nil",
+			key:  _blsPrivateKey("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866"),
+			msg:  _byteArray("0102030405060708090a0b0c0d0e0f"),
+			err:  errors.New("no path"),
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			sig := test.key.Sign(test.msg, test.domain)
-			verified := sig.Verify(test.msg, test.key.PublicKey(), test.domain)
+			sig := test.key.Sign(test.msg)
+			verified := sig.Verify(test.msg, test.key.PublicKey())
 			assert.Equal(t, verified, true)
 
 			sig2, err := types.BLSSignatureFromBytes(sig.Marshal())

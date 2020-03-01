@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -35,34 +35,33 @@ func TestAggregate(t *testing.T) {
 	pk3, err := types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 
-	msgs := make([][32]byte, 3)
+	msgs := make([][]byte, 3)
 	msg0 := [32]byte{}
 	_, err = rand.Read(msg0[:])
 	require.Nil(t, err)
-	msgs[0] = msg0
+	msgs[0] = msg0[:]
 	msg1 := [32]byte{}
 	_, err = rand.Read(msg1[:])
 	require.Nil(t, err)
-	msgs[1] = msg1
+	msgs[1] = msg1[:]
 	msg2 := [32]byte{}
 	_, err = rand.Read(msg2[:])
 	require.Nil(t, err)
-	msgs[2] = msg2
+	msgs[2] = msg2[:]
 
 	pubKeys := make([]types.PublicKey, 3)
 	pubKeys[0] = pk1.PublicKey()
 	pubKeys[1] = pk2.PublicKey()
 	pubKeys[2] = pk3.PublicKey()
 
-	domain := uint64(15432456)
 	sigs := make([]types.Signature, 3)
-	sigs[0] = pk1.Sign(msgs[0][:], domain)
-	sigs[1] = pk2.Sign(msgs[1][:], domain)
-	sigs[2] = pk3.Sign(msgs[2][:], domain)
+	sigs[0] = pk1.Sign(msgs[0])
+	sigs[1] = pk2.Sign(msgs[1])
+	sigs[2] = pk3.Sign(msgs[2])
 
 	sig := types.AggregateSignatures(sigs)
 
-	verified := sig.VerifyAggregate(msgs, pubKeys, domain)
+	verified := sig.VerifyAggregate(msgs, pubKeys)
 	assert.True(t, verified)
 }
 
@@ -73,14 +72,13 @@ func TestAggregateNoSigs(t *testing.T) {
 	pubKeys := make([]types.PublicKey, 0)
 
 	msg := []byte("A test message")
-	domain := uint64(15432456)
-	sig := pk1.Sign(msg, domain)
+	sig := pk1.Sign(msg)
 
-	verified := sig.VerifyAggregateCommon(msg, pubKeys, domain)
+	verified := sig.VerifyAggregateCommon(msg, pubKeys)
 	assert.False(t, verified)
 
-	msgs := make([][32]byte, 0)
-	verified = sig.VerifyAggregate(msgs, pubKeys, domain)
+	msgs := make([][]byte, 0)
+	verified = sig.VerifyAggregate(msgs, pubKeys)
 	assert.False(t, verified)
 }
 
@@ -98,14 +96,19 @@ func TestAggregateCommon(t *testing.T) {
 	pubKeys[2] = pk3.PublicKey()
 
 	msg := []byte("A test message")
-	domain := uint64(15432456)
 	sigs := make([]types.Signature, 3)
-	sigs[0] = pk1.Sign(msg, domain)
-	sigs[1] = pk2.Sign(msg, domain)
-	sigs[2] = pk3.Sign(msg, domain)
+	sigs[0] = pk1.Sign(msg)
+	sigs[1] = pk2.Sign(msg)
+	sigs[2] = pk3.Sign(msg)
 
-	sig := types.AggregateSignatures(sigs)
+	aggSig := types.AggregateSignatures(sigs)
 
-	verified := sig.VerifyAggregateCommon(msg, pubKeys, domain)
+	verified := aggSig.VerifyAggregateCommon(msg, pubKeys)
 	assert.True(t, verified)
+}
+
+func TestAggregateNone(t *testing.T) {
+	sigs := make([]types.Signature, 0)
+	aggSig := types.AggregateSignatures(sigs)
+	assert.Nil(t, aggSig)
 }

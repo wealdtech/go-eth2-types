@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 package types
 
 type Signature interface {
-	Verify(msg []byte, pub PublicKey, domain uint64) bool
-	VerifyAggregate(msgs [][32]byte, pubKeys []PublicKey, domain uint64) bool
-	VerifyAggregateCommon(msg []byte, pubKeys []PublicKey, domain uint64) bool
+	Verify(msg []byte, pub PublicKey) bool
+	VerifyAggregate(msgs [][]byte, pubKeys []PublicKey) bool
+	VerifyAggregateCommon(msg []byte, pubKeys []PublicKey) bool
 	Marshal() []byte
 }

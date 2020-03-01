@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,73 +14,70 @@
 package types
 
 import (
-	g1 "github.com/phoreproject/bls/g1pubs"
+	bls "github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	bytesutil "github.com/wealdtech/go-bytesutil"
 )
 
 // BLSSignature is a BLS signature.
 type BLSSignature struct {
-	sig *g1.Signature
+	sig *bls.Sign
 }
 
 // BLSSignatureFromBytes creates a BLS signature from a byte slice.
 func BLSSignatureFromBytes(data []byte) (Signature, error) {
-	sig, err := g1.DeserializeSignature(bytesutil.ToBytes96(data))
-	if err != nil {
+	var sig bls.Sign
+	if err := sig.Deserialize(data); err != nil {
 		return nil, errors.Wrap(err, "failed to deserialize signature")
 	}
-	return &BLSSignature{sig: sig}, nil
+	return &BLSSignature{sig: &sig}, nil
 }
 
-// Verify a bls signature given a public key, a message, and a domain.
-func (s *BLSSignature) Verify(msg []byte, pubKey PublicKey, domain uint64) bool {
-	domainBytes := bytesutil.ToBytes8(bytesutil.Bytes8(domain))
-	return g1.VerifyWithDomain(bytesutil.ToBytes32(msg), pubKey.(*BLSPublicKey).key, s.sig, domainBytes)
+// Verify a bls signature given a public key and a message.
+func (s *BLSSignature) Verify(msg []byte, pubKey PublicKey) bool {
+	return s.sig.VerifyByte(pubKey.(*BLSPublicKey).key, msg)
 }
 
 // VerifyAggregate verifies each public key against its respective message.
 // Note: this is vulnerable to a rogue public-key attack.
-func (s *BLSSignature) VerifyAggregate(msgs [][32]byte, pubKeys []PublicKey, domain uint64) bool {
+func (s *BLSSignature) VerifyAggregate(msgs [][]byte, pubKeys []PublicKey) bool {
 	if len(pubKeys) == 0 {
 		return false
 	}
-	var keys []*g1.PublicKey
-	for _, v := range pubKeys {
-		keys = append(keys, v.(*BLSPublicKey).key)
+	keys := make([]bls.PublicKey, len(pubKeys))
+	for i, v := range pubKeys {
+		keys[i] = *v.(*BLSPublicKey).key
 	}
-	domainBytes := bytesutil.ToBytes8(bytesutil.Bytes8(domain))
-	return s.sig.VerifyAggregateWithDomain(keys, msgs, domainBytes)
+	return s.sig.VerifyAggregateHashes(keys, msgs)
 }
 
 // VerifyAggregateCommon verifies each public key against a single message.
 // Note: this is vulnerable to a rogue public-key attack.
-func (s *BLSSignature) VerifyAggregateCommon(msg []byte, pubKeys []PublicKey, domain uint64) bool {
+func (s *BLSSignature) VerifyAggregateCommon(msg []byte, pubKeys []PublicKey) bool {
 	if len(pubKeys) == 0 {
 		return false
 	}
-	var keys []*g1.PublicKey
-	for _, v := range pubKeys {
-		keys = append(keys, v.(*BLSPublicKey).key)
+	keys := make([]bls.PublicKey, len(pubKeys))
+	for i, v := range pubKeys {
+		keys[i] = *v.(*BLSPublicKey).key
 	}
-	domainBytes := bytesutil.ToBytes8(bytesutil.Bytes8(domain))
-	return s.sig.VerifyAggregateCommonWithDomain(keys, bytesutil.ToBytes32(msg), domainBytes)
+	return s.sig.FastAggregateVerify(keys, msg)
 }
 
 // Marshal a signature into a byte slice.
 func (s *BLSSignature) Marshal() []byte {
-	k := s.sig.Serialize()
-	return k[:]
+	return s.sig.Serialize()
 }
 
-// AggregateSignatures aggregates a slice of signatures.
-func AggregateSignatures(sigs []Signature) Signature {
-	var ss []*g1.Signature
-	for _, v := range sigs {
-		if v == nil {
-			continue
-		}
-		ss = append(ss, v.(*BLSSignature).sig)
+// AggregateSignatures aggregates signatures.
+func AggregateSignatures(sigs []Signature) *BLSSignature {
+	if len(sigs) == 0 {
+		return nil
 	}
-	return &BLSSignature{sig: g1.AggregateSignatures(ss)}
+	aggSig := &bls.Sign{}
+	//#nosec G104
+	_ = aggSig.Deserialize(sigs[0].(*BLSSignature).Marshal())
+	for _, sig := range sigs[1:] {
+		aggSig.Add(sig.(*BLSSignature).sig)
+	}
+	return &BLSSignature{sig: aggSig}
 }

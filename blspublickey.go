@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,14 +14,13 @@
 package types
 
 import (
-	g1 "github.com/phoreproject/bls/g1pubs"
+	bls "github.com/herumi/bls-eth-go-binary/bls"
 	"github.com/pkg/errors"
-	bytesutil "github.com/wealdtech/go-bytesutil"
 )
 
 // BLSPublicKey used in the BLS signature scheme.
 type BLSPublicKey struct {
-	key *g1.PublicKey
+	key *bls.PublicKey
 }
 
 // BLSPublicKeyFromBytes creates a BLS public key from a byte slice.
@@ -29,22 +28,28 @@ func BLSPublicKeyFromBytes(pub []byte) (*BLSPublicKey, error) {
 	if len(pub) != 48 {
 		return nil, errors.New("public key must be 48 bytes")
 	}
-	key, err := g1.DeserializePublicKey(bytesutil.ToBytes48(pub))
-	if err != nil {
+	var key bls.PublicKey
+	if err := key.Deserialize(pub); err != nil {
 		return nil, errors.Wrap(err, "failed to deserialize public key")
 	}
-	return &BLSPublicKey{key: key}, nil
+	return &BLSPublicKey{key: &key}, nil
 }
 
-// Aggregate two public keys.
-func (p *BLSPublicKey) Aggregate(other PublicKey) PublicKey {
-	pubKey := p.key.Copy()
-	pubKey.Aggregate(other.(*BLSPublicKey).key)
-	return &BLSPublicKey{key: pubKey}
+// Aggregate two public keys.  This updates the value of the existing key.
+func (k *BLSPublicKey) Aggregate(other PublicKey) {
+	k.key.Add(other.(*BLSPublicKey).key)
 }
 
 // Marshal a BLS public key into a byte slice.
-func (p *BLSPublicKey) Marshal() []byte {
-	data := p.key.Serialize()
-	return data[:]
+func (k *BLSPublicKey) Marshal() []byte {
+	return k.key.Serialize()
+}
+
+// Copy creates a copy of the public key.
+func (k *BLSPublicKey) Copy() PublicKey {
+	bytes := k.Marshal()
+	var newKey bls.PublicKey
+	//#nosec G104
+	_ = newKey.Deserialize(bytes)
+	return &BLSPublicKey{key: &newKey}
 }
