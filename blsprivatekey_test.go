@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func _byteArray(input string) []byte {
@@ -28,28 +28,28 @@ func _byteArray(input string) []byte {
 	return res
 }
 
-func _blsPrivateKey(input string) *types.BLSPrivateKey {
+func _blsPrivateKey(input string) *e2types.BLSPrivateKey {
 	data, _ := hex.DecodeString(input)
-	res, _ := types.BLSPrivateKeyFromBytes(data)
+	res, _ := e2types.BLSPrivateKeyFromBytes(data)
 	return res
 }
 
 func TestBLSPrivateKeyFromBytes(t *testing.T) {
 	goodBytes, err := hex.DecodeString("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866")
 	require.Nil(t, err)
-	_, err = types.BLSPrivateKeyFromBytes(goodBytes)
+	_, err = e2types.BLSPrivateKeyFromBytes(goodBytes)
 	assert.Nil(t, err)
 
 	badBytes, err := hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 	require.Nil(t, err)
-	_, err = types.BLSPrivateKeyFromBytes(badBytes)
+	_, err = e2types.BLSPrivateKeyFromBytes(badBytes)
 	assert.NotNil(t, err)
 }
 
 func TestBLSSignature(t *testing.T) {
 	tests := []struct {
 		name string
-		key  *types.BLSPrivateKey
+		key  *e2types.BLSPrivateKey
 		msg  []byte
 		err  error
 	}{
@@ -67,7 +67,7 @@ func TestBLSSignature(t *testing.T) {
 			verified := sig.Verify(test.msg, test.key.PublicKey())
 			assert.Equal(t, verified, true)
 
-			sig2, err := types.BLSSignatureFromBytes(sig.Marshal())
+			sig2, err := e2types.BLSSignatureFromBytes(sig.Marshal())
 			require.Nil(t, err)
 			assert.Equal(t, sig.Marshal(), sig2.Marshal())
 		})
@@ -75,11 +75,11 @@ func TestBLSSignature(t *testing.T) {
 }
 
 func TestGenerateBLSPrivateKey(t *testing.T) {
-	key, err := types.GenerateBLSPrivateKey()
+	key, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 	assert.NotNil(t, key)
 	assert.NotNil(t, key.Marshal())
 
-	_, err = types.BLSPrivateKeyFromBytes(key.Marshal()[:31])
+	_, err = e2types.BLSPrivateKeyFromBytes(key.Marshal()[:31])
 	assert.NotNil(t, err)
 }

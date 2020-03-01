@@ -19,41 +19,41 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func TestBLSPublicKeyFromBytes(t *testing.T) {
 	privBytes, err := hex.DecodeString("25295f0d1d592a90b333e26e85149708208e9f8e8bc18f6c77bd62f8ad7a6866")
 	require.Nil(t, err)
-	priv, err := types.BLSPrivateKeyFromBytes(privBytes)
+	priv, err := e2types.BLSPrivateKeyFromBytes(privBytes)
 	require.Nil(t, err)
 
 	goodBytes := priv.PublicKey().Marshal()
-	_, err = types.BLSPublicKeyFromBytes(goodBytes)
+	_, err = e2types.BLSPublicKeyFromBytes(goodBytes)
 	assert.Nil(t, err)
 
 	badBytes, err := hex.DecodeString("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 	require.Nil(t, err)
-	_, err = types.BLSPublicKeyFromBytes(badBytes)
+	_, err = e2types.BLSPublicKeyFromBytes(badBytes)
 	assert.NotNil(t, err)
 }
 
 func TestBLSPublicKey(t *testing.T) {
-	privKey1, err := types.GenerateBLSPrivateKey()
+	privKey1, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 
 	pubKey1 := privKey1.PublicKey()
 	bytes := pubKey1.Marshal()
 
-	pubKey1Copy, err := types.BLSPublicKeyFromBytes(bytes)
+	pubKey1Copy, err := e2types.BLSPublicKeyFromBytes(bytes)
 	require.Nil(t, err)
 
 	assert.Equal(t, pubKey1.Marshal(), pubKey1Copy.Marshal())
 
-	_, err = types.BLSPublicKeyFromBytes(bytes[:46])
+	_, err = e2types.BLSPublicKeyFromBytes(bytes[:46])
 	require.NotNil(t, err)
 
-	privKey2, err := types.GenerateBLSPrivateKey()
+	privKey2, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 	pubKey2 := privKey2.PublicKey()
 

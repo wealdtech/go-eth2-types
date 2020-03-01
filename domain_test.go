@@ -17,10 +17,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	types "github.com/wealdtech/go-eth2-types"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func TestDomain(t *testing.T) {
-	domain := types.Domain(types.DomainVoluntaryExit, []byte{0x01, 0x02, 0x03, 0x04})
+	domain := e2types.Domain(e2types.DomainVoluntaryExit, []byte{0x01, 0x02, 0x03, 0x04})
 	assert.Equal(t, uint64(0x0403020100000004), domain)
 }

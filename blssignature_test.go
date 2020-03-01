@@ -19,20 +19,20 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	types "github.com/wealdtech/go-eth2-types"
+	e2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 func TestInvalidSignatureFromBytes(t *testing.T) {
-	_, err := types.BLSSignatureFromBytes([]byte{0x00})
+	_, err := e2types.BLSSignatureFromBytes([]byte{0x00})
 	require.NotNil(t, err)
 }
 
 func TestAggregate(t *testing.T) {
-	pk1, err := types.GenerateBLSPrivateKey()
+	pk1, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
-	pk2, err := types.GenerateBLSPrivateKey()
+	pk2, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
-	pk3, err := types.GenerateBLSPrivateKey()
+	pk3, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 
 	msgs := make([][]byte, 3)
@@ -49,27 +49,27 @@ func TestAggregate(t *testing.T) {
 	require.Nil(t, err)
 	msgs[2] = msg2[:]
 
-	pubKeys := make([]types.PublicKey, 3)
+	pubKeys := make([]e2types.PublicKey, 3)
 	pubKeys[0] = pk1.PublicKey()
 	pubKeys[1] = pk2.PublicKey()
 	pubKeys[2] = pk3.PublicKey()
 
-	sigs := make([]types.Signature, 3)
+	sigs := make([]e2types.Signature, 3)
 	sigs[0] = pk1.Sign(msgs[0])
 	sigs[1] = pk2.Sign(msgs[1])
 	sigs[2] = pk3.Sign(msgs[2])
 
-	sig := types.AggregateSignatures(sigs)
+	sig := e2types.AggregateSignatures(sigs)
 
 	verified := sig.VerifyAggregate(msgs, pubKeys)
 	assert.True(t, verified)
 }
 
 func TestAggregateNoSigs(t *testing.T) {
-	pk1, err := types.GenerateBLSPrivateKey()
+	pk1, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 
-	pubKeys := make([]types.PublicKey, 0)
+	pubKeys := make([]e2types.PublicKey, 0)
 
 	msg := []byte("A test message")
 	sig := pk1.Sign(msg)
@@ -83,32 +83,32 @@ func TestAggregateNoSigs(t *testing.T) {
 }
 
 func TestAggregateCommon(t *testing.T) {
-	pk1, err := types.GenerateBLSPrivateKey()
+	pk1, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
-	pk2, err := types.GenerateBLSPrivateKey()
+	pk2, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
-	pk3, err := types.GenerateBLSPrivateKey()
+	pk3, err := e2types.GenerateBLSPrivateKey()
 	require.Nil(t, err)
 
-	pubKeys := make([]types.PublicKey, 3)
+	pubKeys := make([]e2types.PublicKey, 3)
 	pubKeys[0] = pk1.PublicKey()
 	pubKeys[1] = pk2.PublicKey()
 	pubKeys[2] = pk3.PublicKey()
 
 	msg := []byte("A test message")
-	sigs := make([]types.Signature, 3)
+	sigs := make([]e2types.Signature, 3)
 	sigs[0] = pk1.Sign(msg)
 	sigs[1] = pk2.Sign(msg)
 	sigs[2] = pk3.Sign(msg)
 
-	aggSig := types.AggregateSignatures(sigs)
+	aggSig := e2types.AggregateSignatures(sigs)
 
 	verified := aggSig.VerifyAggregateCommon(msg, pubKeys)
 	assert.True(t, verified)
 }
 
 func TestAggregateNone(t *testing.T) {
-	sigs := make([]types.Signature, 0)
-	aggSig := types.AggregateSignatures(sigs)
+	sigs := make([]e2types.Signature, 0)
+	aggSig := e2types.AggregateSignatures(sigs)
 	assert.Nil(t, aggSig)
 }
