@@ -1,4 +1,4 @@
-// Copyright © 2019 Weald Technology Trading
+// Copyright © 2019, 2020 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,27 +13,34 @@
 
 package types
 
-import (
-	"encoding/binary"
-)
+// DomainType defines the type of the domain, as per https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#custom-types
+type DomainType [4]byte
+
+// ZeroForkVersion is used where there is no requirement for a fork version, e.g. deposits.
+var ZeroForkVersion = []byte{0, 0, 0, 0}
+
+// ZeroGenesisValidatorsRoot is used where there is no requirement for a genesis validators root, e.g. deposits.
+var ZeroGenesisValidatorsRoot = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 var (
 	// DomainBeaconProposer is a domain constant.
-	DomainBeaconProposer = []byte{0, 0, 0, 0}
+	DomainBeaconProposer = DomainType{0, 0, 0, 0}
 	// DomainBeaconAttester is a domain constant.
-	DomainBeaconAttester = []byte{1, 0, 0, 0}
+	DomainBeaconAttester = DomainType{1, 0, 0, 0}
 	// DomainRANDAO is a domain constant.
-	DomainRANDAO = []byte{2, 0, 0, 0}
+	DomainRANDAO = DomainType{2, 0, 0, 0}
 	// DomainDeposit is a domain constant.
-	DomainDeposit = []byte{3, 0, 0, 0}
+	DomainDeposit = DomainType{3, 0, 0, 0}
 	// DomainVoluntaryExit is a domain constant.
-	DomainVoluntaryExit = []byte{4, 0, 0, 0}
+	DomainVoluntaryExit = DomainType{4, 0, 0, 0}
 )
 
-// Domain returns a uint64 domain
-func Domain(domainType []byte, forkVersion []byte) uint64 {
-	res := make([]byte, 8)
-	copy(res[0:4], domainType)
+// Domain returns a complete domain.
+func Domain(domainType DomainType, forkVersion []byte, genesisValidatorsRoot []byte) []byte {
+	res := make([]byte, 32)
+	copy(res[0:4], domainType[:])
 	copy(res[4:8], forkVersion)
-	return binary.LittleEndian.Uint64(res)
+	// Last 24 bytes are first 24 bytes of genesis validators root.
+	copy(res[8:32], genesisValidatorsRoot)
+	return res
 }
