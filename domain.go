@@ -13,6 +13,8 @@
 
 package types
 
+import "github.com/prysmaticlabs/go-ssz"
+
 // DomainType defines the type of the domain, as per https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#custom-types
 type DomainType [4]byte
 
@@ -37,10 +39,21 @@ var (
 
 // Domain returns a complete domain.
 func Domain(domainType DomainType, forkVersion []byte, genesisValidatorsRoot []byte) []byte {
+	// Generate fork data root from fork version and genesis validators root.
+	forkDataRoot, err := ssz.HashTreeRoot(struct {
+		CurrentVersion        []byte `ssz-size:"4"`
+		GenesisValidatorsRoot []byte `ssz-size:"32"`
+	}{
+		CurrentVersion:        forkVersion,
+		GenesisValidatorsRoot: genesisValidatorsRoot,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	res := make([]byte, 32)
 	copy(res[0:4], domainType[:])
-	copy(res[4:8], forkVersion)
-	// Last 24 bytes are first 24 bytes of genesis validators root.
-	copy(res[8:32], genesisValidatorsRoot)
+	copy(res[4:32], forkDataRoot[:])
+
 	return res
 }
