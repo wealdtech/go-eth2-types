@@ -30,6 +30,6 @@ func TestDomain(t *testing.T) {
 	genesisRoot := _hexStringToBytes("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
 	domain := e2types.Domain(e2types.DomainVoluntaryExit, []byte{0x01, 0x02, 0x03, 0x04}, genesisRoot)
 
-	expectedDomain := _hexStringToBytes("0400000001020304ffffffffffffffffffffffffffffffffffffffffffffffff")
+	expectedDomain := _hexStringToBytes("04000000455d830fbf2b372107e69fb1d4769fc7555304f7ae9b26b0aeca2f61")
 	assert.Equal(t, expectedDomain, domain)
 }
