@@ -16,6 +16,7 @@ package types_test
 import (
 	"encoding/hex"
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -32,6 +33,13 @@ func _blsPrivateKey(input string) *e2types.BLSPrivateKey {
 	data, _ := hex.DecodeString(input)
 	res, _ := e2types.BLSPrivateKeyFromBytes(data)
 	return res
+}
+
+func TestMain(m *testing.M) {
+	if err := e2types.InitBLS(); err != nil {
+		os.Exit(1)
+	}
+	os.Exit(m.Run())
 }
 
 func TestBLSPrivateKeyFromBytes(t *testing.T) {
@@ -65,7 +73,7 @@ func TestBLSSignature(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			sig := test.key.Sign(test.msg)
 			verified := sig.Verify(test.msg, test.key.PublicKey())
-			assert.Equal(t, verified, true)
+			require.Equal(t, verified, true)
 
 			sig2, err := e2types.BLSSignatureFromBytes(sig.Marshal())
 			require.Nil(t, err)

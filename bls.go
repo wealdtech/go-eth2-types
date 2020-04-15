@@ -18,10 +18,12 @@ import (
 )
 
 // InitBLS initialises the BLS library with the appropriate curve and parameters for Ethereum 2.
-func InitBLS() {
-	err := bls.Init(bls.BLS12_381)
-	if err != nil {
-		panic(err)
+func InitBLS() error {
+	if err := bls.Init(bls.BLS12_381); err != nil {
+		return err
 	}
-	bls.SetETHmode(2)
+	if err := bls.SetETHmode(2); err != nil {
+		return err
+	}
+	return nil
 }
