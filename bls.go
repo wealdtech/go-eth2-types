@@ -17,10 +17,11 @@ import (
 	bls "github.com/herumi/bls-eth-go-binary/bls"
 )
 
-func init() {
+// InitBLS initialises the BLS library with the appropriate curve and parameters for Ethereum 2.
+func InitBLS() {
 	err := bls.Init(bls.BLS12_381)
 	if err != nil {
 		panic(err)
 	}
-	bls.SetETHmode(1)
+	bls.SetETHmode(2)
 }
