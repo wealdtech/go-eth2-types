@@ -8,7 +8,7 @@
 
 Go library providing Ethereum 2 types.
 
-** Please note that this library uses standards that are not yet final, and as such may result in changes that alter public and private keys.  Do not use this library for production use just yet **
+**Please note that this library uses standards that are not yet final, and as such may result in changes that alter public and private keys.  Do not use this library for production use just yet**
 
 ## Table of Contents
 
@@ -28,7 +28,9 @@ go get github.com/wealdtech/go-eth2-types
 
 ## Usage
 
-Please read the [Go documentation for this library](https://godoc.org/github.com/wealdtech/go-eth2-types).
+**Before using any cryptographic features you must call `InitBLS()`.**
+
+Please read the [Go documentation for this library](https://godoc.org/github.com/wealdtech/go-eth2-types) for interface information.
 
 ## Maintainers
 
