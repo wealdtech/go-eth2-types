@@ -31,7 +31,7 @@ func BLSPrivateKeyFromBytes(priv []byte) (*BLSPrivateKey, error) {
 	}
 	var sec bls.SecretKey
 	if err := sec.Deserialize(priv); err != nil {
-		return nil, errors.New("invalid private key")
+		return nil, errors.Wrap(err, "invalid private key")
 	}
 	return &BLSPrivateKey{key: sec}, nil
 }
