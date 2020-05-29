@@ -22,7 +22,7 @@ func InitBLS() error {
 	if err := bls.Init(bls.BLS12_381); err != nil {
 		return err
 	}
-	if err := bls.SetETHmode(1); err != nil {
+	if err := bls.SetETHmode(bls.EthModeDraft07); err != nil {
 		return err
 	}
 	return nil
