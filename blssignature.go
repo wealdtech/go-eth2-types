@@ -32,6 +32,11 @@ func BLSSignatureFromBytes(data []byte) (Signature, error) {
 	return &BLSSignature{sig: &sig}, nil
 }
 
+// BLSSignatureFromSig creates a BLS signature from an existing signature.
+func BLSSignatureFromSig(sig bls.Sign) (Signature, error) {
+	return &BLSSignature{sig: &sig}, nil
+}
+
 // Verify a bls signature given a public key and a message.
 func (s *BLSSignature) Verify(msg []byte, pubKey PublicKey) bool {
 	return s.sig.VerifyByte(pubKey.(*BLSPublicKey).key, msg)
