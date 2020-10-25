@@ -13,15 +13,15 @@
 
 package types
 
-import "github.com/prysmaticlabs/go-ssz"
+import "github.com/pkg/errors"
 
 // DomainType defines the type of the domain, as per https://github.com/ethereum/eth2.0-specs/blob/dev/specs/phase0/beacon-chain.md#custom-types
 type DomainType [4]byte
 
-// ZeroForkVersion is used where there is no requirement for a fork version, e.g. deposits.
+// ZeroForkVersion is an empty fork version.
 var ZeroForkVersion = []byte{0, 0, 0, 0}
 
-// ZeroGenesisValidatorsRoot is used where there is no requirement for a genesis validators root, e.g. deposits.
+// ZeroGenesisValidatorsRoot is an empty genesis validators root.
 var ZeroGenesisValidatorsRoot = []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 var (
@@ -41,16 +41,41 @@ var (
 	DomainAggregateAndProof = []byte{6, 0, 0, 0}
 )
 
-// Domain returns a complete domain.
-func Domain(domainType DomainType, forkVersion []byte, genesisValidatorsRoot []byte) []byte {
+// ComputeDomain computes a domain.
+func ComputeDomain(domainType DomainType, forkVersion []byte, genesisValidatorsRoot []byte) ([]byte, error) {
+	if len(forkVersion) != 4 {
+		return nil, errors.New("fork version must be 4 bytes in length")
+	}
+	if len(genesisValidatorsRoot) != 32 {
+		return nil, errors.New("genesis validators root must be 32 bytes in length")
+	}
+
 	// Generate fork data root from fork version and genesis validators root.
-	forkDataRoot, err := ssz.HashTreeRoot(struct {
-		CurrentVersion        []byte `ssz-size:"4"`
-		GenesisValidatorsRoot []byte `ssz-size:"32"`
-	}{
+	forkData := &ForkData{
 		CurrentVersion:        forkVersion,
 		GenesisValidatorsRoot: genesisValidatorsRoot,
-	})
+	}
+	forkDataRoot, err := forkData.HashTreeRoot()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate fork data hash tree root")
+	}
+
+	res := make([]byte, 32)
+	copy(res[0:4], domainType[:])
+	copy(res[4:32], forkDataRoot[:])
+
+	return res, nil
+}
+
+// Domain returns a complete domain.
+// Deprecated: due to panicking on error.  Use ComputeDomain() instead.
+func Domain(domainType DomainType, forkVersion []byte, genesisValidatorsRoot []byte) []byte {
+	// Generate fork data root from fork version and genesis validators root.
+	forkData := &ForkData{
+		CurrentVersion:        forkVersion,
+		GenesisValidatorsRoot: genesisValidatorsRoot,
+	}
+	forkDataRoot, err := forkData.HashTreeRoot()
 	if err != nil {
 		panic(err)
 	}
