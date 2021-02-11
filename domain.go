@@ -36,9 +36,9 @@ var (
 	// DomainVoluntaryExit is a domain constant.
 	DomainVoluntaryExit = DomainType{4, 0, 0, 0}
 	// DomainSelectionProof is a domain constant.
-	DomainSelectionProof = []byte{5, 0, 0, 0}
+	DomainSelectionProof = DomainType{5, 0, 0, 0}
 	// DomainAggregateAndProof is a domain constant.
-	DomainAggregateAndProof = []byte{6, 0, 0, 0}
+	DomainAggregateAndProof = DomainType{6, 0, 0, 0}
 )
 
 // ComputeDomain computes a domain.
