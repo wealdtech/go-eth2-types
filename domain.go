@@ -39,6 +39,12 @@ var (
 	DomainSelectionProof = DomainType{5, 0, 0, 0}
 	// DomainAggregateAndProof is a domain constant.
 	DomainAggregateAndProof = DomainType{6, 0, 0, 0}
+	// DomainSyncCommittee is a domain constant.
+	DomainSyncCommittee = DomainType{7, 0, 0, 0}
+	// DomainSyncCommitteeSelectionProof is a domain constant.
+	DomainSyncCommitteeSelectionProof = DomainType{8, 0, 0, 0}
+	// DomainContributionAndProof is a domain constant.
+	DomainContributionAndProof = DomainType{9, 0, 0, 0}
 )
 
 // ComputeDomain computes a domain.
