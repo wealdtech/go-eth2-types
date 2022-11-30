@@ -1,4 +1,4 @@
-// Copyright 2020 Weald Technology Trading
+// Copyright 2020, 2022 Weald Technology Trading
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,8 +22,5 @@ func InitBLS() error {
 	if err := bls.Init(bls.BLS12_381); err != nil {
 		return err
 	}
-	if err := bls.SetETHmode(bls.EthModeDraft07); err != nil {
-		return err
-	}
-	return nil
+	return bls.SetETHmode(bls.EthModeDraft07)
 }
