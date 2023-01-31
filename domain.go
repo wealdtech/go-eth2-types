@@ -45,6 +45,8 @@ var (
 	DomainSyncCommitteeSelectionProof = DomainType{8, 0, 0, 0}
 	// DomainContributionAndProof is a domain constant.
 	DomainContributionAndProof = DomainType{9, 0, 0, 0}
+	// DomainBlsToExecutionChange is a domain constant.
+	DomainBlsToExecutionChange = DomainType{0x0A, 0, 0, 0}
 )
 
 // ComputeDomain computes a domain.
