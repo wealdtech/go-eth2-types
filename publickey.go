@@ -13,7 +13,7 @@
 
 package types
 
-// PublicKey is an interface for public keys
+// PublicKey is an interface for public keys.
 type PublicKey interface {
 	Marshal() []byte
 	Aggregate(other PublicKey)
