@@ -1,4 +1,4 @@
-// Copyright © 2019, 2020 Weald Technology Trading
+// Copyright © 2019 - 2023 Weald Technology Trading.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -47,6 +47,8 @@ var (
 	DomainContributionAndProof = DomainType{9, 0, 0, 0}
 	// DomainBlsToExecutionChange is a domain constant.
 	DomainBlsToExecutionChange = DomainType{0x0A, 0, 0, 0}
+	// DomainBlobSidecar is a domain constant.
+	DomainBlobSidecar = DomainType{0x0B, 0, 0, 0}
 )
 
 // ComputeDomain computes a domain.
